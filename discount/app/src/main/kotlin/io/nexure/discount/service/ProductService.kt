@@ -26,7 +26,10 @@ class ProductService(private val repository: ProductRepository) {
 
     private fun Product.calculateFinalPrice(): Double {
         val vatRate = VatConfig.getVatRate(country)
-        val totalDiscountPercent = discounts.sumOf { it.percent / 100.0 }
-        return basePrice * (1 - totalDiscountPercent) * (1 + vatRate)
+        // Apply discounts multiplicatively: (1 - d1) * (1 - d2) * ... 
+        val discountMultiplier = discounts.fold(1.0) { acc, discount ->
+            acc * (1 - discount.percent / 100.0)
+        }
+        return basePrice * discountMultiplier * (1 + vatRate)
     }
 }
