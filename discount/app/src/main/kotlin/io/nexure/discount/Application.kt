@@ -2,10 +2,13 @@ package io.nexure.discount
 
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -35,6 +38,11 @@ fun Application.module() {
     val mongoClient = MongoClient.create(mongoConnectionString)
     val repository = ProductRepository(mongoClient)
     val service = ProductService(repository)
+    
+    // JSON serialization
+    install(ContentNegotiation) {
+        json()
+    }
     
     // Initialize repository
     monitor.subscribe(ApplicationStarted) {
